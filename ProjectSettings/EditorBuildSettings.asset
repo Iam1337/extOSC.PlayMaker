@@ -6,5 +6,5 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/extOSC.PlayMaker/TestScene.unity
+    path: Assets/TestScene.unity
     guid: 68624c550065b8343bbd45febcca3270

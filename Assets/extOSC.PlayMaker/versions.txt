@@ -5,3 +5,9 @@ v1.0
 ----
 
 - First Release
+
+----
+v1.1
+----
+
+- Added OSCTransmitter actions.
