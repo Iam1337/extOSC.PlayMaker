@@ -8,109 +8,130 @@ using HutongGames.PlayMaker;
 
 using extOSC.Core;
 using extOSC.Core.Events;
+using extOSC.Mapping;
 
 namespace extOSC.PlayMaker
 {
-    [ActionCategory("extOSC")]
-    public abstract class OSCReceiverAction : FsmStateAction, IOSCBind
-    {
-        #region Public Vars
+	[ActionCategory("extOSC")]
+	public abstract class OSCReceiverAction : FsmStateAction, IOSCBind
+	{
+		#region Public Vars
 
-        [RequiredField]
-        [DisplayOrder(0)]
-        [CheckForComponent(typeof(OSCReceiver))]
-        [Tooltip("GameObject with OSCReceiver.")]
-        public FsmOwnerDefault ReceiverObject;
+		[RequiredField]
+		[DisplayOrder(0)]
+		[CheckForComponent(typeof(OSCReceiver))]
+		[Tooltip("GameObject with OSCReceiver.")]
+		public FsmOwnerDefault ReceiverObject;
 
-        [RequiredField]
-        [DisplayOrder(1)]
-        [Tooltip("OSCReceiver binding address.")]
-        public FsmString ReceiverAddress;
+		[RequiredField]
+		[DisplayOrder(1)]
+		[Tooltip("OSCReceiver binding address.")]
+		public FsmString ReceiverAddress;
 
-        // Hidden by Interface.
-        string IOSCBind.ReceiverAddress {
-            get { return ReceiverAddress.Value; }
-        }
+		[DisplayOrder(2)]
+		[ObjectType(typeof(OSCMapBundle))]
+		public FsmObject MapBundle;
 
-        OSCEventMessage IOSCBind.Callback {
-            get {
-                if (callback == null)
-                {
-                    callback = new OSCEventMessage();
-                    callback.AddListener(InvokeMessage);
-                }
+		// Hidden by Interface.
+		string IOSCBind.ReceiverAddress
+		{
+			get { return ReceiverAddress.Value; }
+		}
 
-                return callback;
-            }
-        }
+		OSCEventMessage IOSCBind.Callback
+		{
+			get
+			{
+				if (callback == null)
+				{
+					callback = new OSCEventMessage();
+					callback.AddListener(InvokeMessage);
+				}
 
-        #endregion
+				return callback;
+			}
+		}
 
-        #region Protected Vars
+		#endregion
 
-        protected OSCEventMessage callback;
+		#region Protected Vars
 
-        protected OSCReceiver receiver;
+		protected OSCEventMessage callback;
 
-        #endregion
+		protected OSCReceiver receiver;
 
-        #region Public Methods
+		#endregion
 
-        public override void Reset()
-        {
-            ReceiverObject = null;
-            ReceiverAddress = null;
-        }
+		#region Public Methods
 
-        public override void OnEnter()
-        {
-            var go = Fsm.GetOwnerDefaultTarget(ReceiverObject);
-            if (go == null)
-            {
-                LogError("Missing ReceiverObject ");
-                return;
-            }
+		public override void Reset()
+		{
+			ReceiverObject = null;
+			ReceiverAddress = null;
+			MapBundle = null;
+		}
 
-            receiver = go.GetComponent<OSCReceiver>();
-            StartCoroutine(BindCoroutine());
-        }
+		public override void OnEnter()
+		{
+			var go = Fsm.GetOwnerDefaultTarget(ReceiverObject);
+			if (go == null)
+			{
+				LogError("Missing ReceiverObject.");
+				return;
+			}
 
-        public override void OnExit()
-        {
-            var gameObject = Fsm.FsmComponent.gameObject;
+			receiver = go.GetComponent<OSCReceiver>();
 
-            if (gameObject.activeInHierarchy)
-                StartCoroutine(UnbindCoroutine());
-        }
+			StartCoroutine(BindCoroutine());
+		}
 
-        #endregion
+		public override void OnExit()
+		{
+			var gameObject = Fsm.FsmComponent.gameObject;
 
-        #region Protected Methods
+			if (gameObject.activeInHierarchy)
+				StartCoroutine(UnbindCoroutine());
+		}
 
-        protected abstract void InvokeMessage(OSCMessage message);
+		#endregion
 
-        #endregion
+		#region Protected Methods
 
-        #region Private Methods
+		protected abstract void Invoke(OSCMessage message);
 
-        private IEnumerator BindCoroutine()
-        {
-            yield return null;
+		#endregion
 
-            if (receiver != null)
-                receiver.Bind(this);
-        }
+		#region Private Methods
 
-        private IEnumerator UnbindCoroutine()
-        {
-            yield return null;
+		private void InvokeMessage(OSCMessage message)
+		{
+			if (MapBundle != null && MapBundle.Value != null)
+			{
+				var mapBundle = (OSCMapBundle) MapBundle.Value;
+				mapBundle.Map(message);
+			}
 
-            if (receiver != null)
-                receiver.Unbind(this);
-        }
+			Invoke(message);
+		}
 
-        #endregion
-    }
+		private IEnumerator BindCoroutine()
+		{
+			yield return null;
+
+			if (receiver != null)
+				receiver.Bind(this);
+		}
+
+		private IEnumerator UnbindCoroutine()
+		{
+			yield return null;
+
+			if (receiver != null)
+				receiver.Unbind(this);
+		}
+
+		#endregion
+	}
 }
 
 #endif

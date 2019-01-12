@@ -6,7 +6,6 @@ using HutongGames.PlayMaker;
 
 namespace extOSC.PlayMaker.Events
 {
-    [ActionCategory("extOSC")]
     public abstract class OSCReceiverEvent : OSCReceiverAction
     {
         #region Public Vars
@@ -29,7 +28,7 @@ namespace extOSC.PlayMaker.Events
 
         #region Protected Methods
 
-        protected override void InvokeMessage(OSCMessage message)
+        protected override void Invoke(OSCMessage message)
         {
             if (ProcessMessage(message))
             {
@@ -42,7 +41,6 @@ namespace extOSC.PlayMaker.Events
         #endregion
     }
 
-    [ActionCategory("extOSC")]
     public abstract class OSCReceiverEvent<TFsmValue, TValue> : OSCReceiverAction where TFsmValue : NamedVariable
     {
         #region Public Vars
@@ -70,7 +68,7 @@ namespace extOSC.PlayMaker.Events
 
         #region Protected Methods
 
-        protected override void InvokeMessage(OSCMessage message)
+        protected override void Invoke(OSCMessage message)
         {
             TValue value;
 

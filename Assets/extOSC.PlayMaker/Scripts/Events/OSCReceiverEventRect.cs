@@ -8,7 +8,6 @@ using HutongGames.PlayMaker;
 
 namespace extOSC.PlayMaker.Events
 {
-    [ActionCategory("extOSC")]
     public class OSCReceiverEventRect : OSCReceiverEvent<FsmRect, Rect>
     {
         #region Protected Methods
